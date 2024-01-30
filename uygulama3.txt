@@ -1,0 +1,1 @@
+Request:  >>> Response: status_code: 200 || todos: [{'id': 19, 'todo': 'Create a compost pile', 'completed': True, 'userId': 5}, {'id': 85, 'todo': 'Make a budget', 'completed': True, 'userId': 5}, {'id': 103, 'todo': 'Go to a local thrift shop', 'completed': True, 'userId': 5}] || total: 3 || skip: 0 || limit: 3 >>> EndPoint: https://dummyjson.com/users/5/todos

@@ -1,0 +1,3 @@
+Request: title: Test >>> Response: status_code: 200 || id: 101 || title: Test >>> EndPoint: https://dummyjson.com/products/add
+Request: title: Test2 >>> Response: status_code: 200 || id: 101 || title: Test2 >>> EndPoint: https://dummyjson.com/products/add
+Request: title: Test3 >>> Response: status_code: 200 || id: 101 || title: Test3 >>> EndPoint: https://dummyjson.com/products/add
