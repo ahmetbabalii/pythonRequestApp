@@ -2,32 +2,59 @@ import pandas as pd
 import requests
 import json
 from concurrent.futures import ThreadPoolExecutor
+import logging
+
+# Logging yapılandırması
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(levelname)s - %(message)s',
+    handlers=[
+        logging.FileHandler('request_app.log'),
+        logging.StreamHandler()
+    ]
+)
 
 def check_none(value):
     return '' if value is None else str(value)
 
 class Veri:
-    def __init__(self, dns, uygulamaadi, endpoint, postOrnek, requestType):
+    def __init__(self, dns, uygulamaadi, endpoint, postOrnek, requestType, timeout=30):
         self.dns = check_none(dns)
         self.uygulamaadi = check_none(uygulamaadi)
         self.endpoint = check_none(endpoint)
         self.postOrnek = check_none(postOrnek)
         self.requestType = check_none(requestType)
+        self.timeout = timeout
         
     def request(self):    
-        print (f'{self.uygulamaadi} için istek gönderiliyor...')   
+        logging.info(f'{self.uygulamaadi} için istek gönderiliyor...')   
+        print(f'{self.uygulamaadi} için istek gönderiliyor...')   
                    
-        headers = {'Content-Type': 'application/json'}       
-        data = json.loads('[' + self.postOrnek + ']') if self.postOrnek else None
-        with ThreadPoolExecutor() as executor:
-            if self.requestType == 'GET':
-                requests_and_responses = list(executor.map(lambda item: (item, requests.get(self.endpoint, headers=headers)), [None]))
-            elif self.requestType == 'POST':
-                requests_and_responses = list(executor.map(lambda item: (item, requests.post(self.endpoint, headers=headers, json=item)), data))
-            else :
-                return None               
-
-        return [RequestAndResponseData(request, response, self.endpoint) for request, response in requests_and_responses]
+        headers = {'Content-Type': 'application/json'}
+        try:       
+            data = json.loads('[' + self.postOrnek + ']') if self.postOrnek else None
+            with ThreadPoolExecutor() as executor:
+                if self.requestType == 'GET':
+                    requests_and_responses = list(executor.map(lambda item: (item, requests.get(self.endpoint, headers=headers, timeout=self.timeout)), [None]))
+                elif self.requestType == 'POST':
+                    requests_and_responses = list(executor.map(lambda item: (item, requests.post(self.endpoint, headers=headers, json=item, timeout=self.timeout)), data))
+                else:
+                    logging.warning(f'{self.uygulamaadi} için geçersiz request tipi: {self.requestType}')
+                    return None
+                    
+            return [RequestAndResponseData(request, response, self.endpoint) for request, response in requests_and_responses]
+        except json.JSONDecodeError:
+            logging.error(f'{self.uygulamaadi} için JSON ayrıştırma hatası: {self.postOrnek}')
+            return None
+        except requests.Timeout:
+            logging.error(f'{self.uygulamaadi} için zaman aşımı hatası: {self.endpoint}')
+            return None
+        except requests.RequestException as e:
+            logging.error(f'{self.uygulamaadi} için istek hatası: {str(e)}')
+            return None
+        except Exception as e:
+            logging.error(f'{self.uygulamaadi} için beklenmeyen hata: {str(e)}')
+            return None
     
 class ResponseData:
     def __init__(self, response):       
@@ -58,12 +85,11 @@ class RequestAndResponseData:
         self.response = ResponseData(response)     
         self.endpoint = endpoint      
         self.statusCode = response.status_code               
-                            
-                            
-df = pd.read_excel('datas.xlsx', engine='openpyxl')
-veriler = [Veri(row['dns'], row['uygulamaadi'], row['endpoint'], row['postOrnek'] , row['requestType']) for index, row in df.iterrows()]
 
-filtered_veriler = [veri for veri in veriler if veri.uygulamaadi ==  'uygulamaadı test'  ]
+df = pd.read_excel('datas.xlsx', engine='openpyxl')
+veriler = [Veri(row['dns'], row['uygulamaadi'], row['endpoint'], row['postOrnek'], row['requestType']) for index, row in df.iterrows()]
+
+filtered_veriler = [veri for veri in veriler if veri.uygulamaadi == 'uygulamaadı test']
 
 for veri in veriler:    
     results = veri.request()
@@ -96,5 +122,5 @@ for veri in veriler:
     #         requestAndResponseSum = f'Request: {reuqestParametersList} >>> Response: {responseParametersList} >>> EndPoint: {endPoint}'
             
     #         f.write(requestAndResponseSum + '\n')
-        
-        
+
+
