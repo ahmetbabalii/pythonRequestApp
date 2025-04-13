@@ -1,24 +1,8 @@
-"""
-Veri işleme sınıfları ve fonksiyonları.
-Bu modülde, istek ve yanıtların işlenmesi için gerekli sınıflar bulunur.
-"""
 import pandas as pd
 from utils import logger
 
 class RequestData:
-    """
-    HTTP isteği verilerini temsil eden sınıf.
-    
-    Attributes:
-        Dinamik olarak eklenen nitelikler
-    """
     def __init__(self, request):
-        """
-        RequestData sınıfı için yapılandırıcı.
-        
-        Args:
-            request (dict): İstek verisi içeren sözlük
-        """
         if request is None: 
             return
             
@@ -31,20 +15,7 @@ class RequestData:
             setattr(self, key, value)
 
 class ResponseData:
-    """
-    HTTP yanıtı verilerini temsil eden sınıf.
-    
-    Attributes:
-        status_code (int): HTTP durum kodu
-        Dinamik olarak eklenen diğer nitelikler
-    """
     def __init__(self, response):
-        """
-        ResponseData sınıfı için yapılandırıcı.
-        
-        Args:
-            response (requests.Response): HTTP yanıtı nesnesi
-        """
         self.status_code = response.status_code
         
         try:
@@ -56,41 +27,13 @@ class ResponseData:
             setattr(self, key, value)
 
 class RequestAndResponseData:
-    """
-    Bir HTTP isteği ve yanıtı çiftini temsil eden sınıf.
-    
-    Attributes:
-        request (RequestData): İstek verileri
-        response (ResponseData): Yanıt verileri
-        endpoint (str): İsteğin yapıldığı endpoint
-        statusCode (int): HTTP durum kodu
-    """
     def __init__(self, request, response, endpoint):
-        """
-        RequestAndResponseData sınıfı için yapılandırıcı.
-        
-        Args:
-            request (dict): İstek verisi
-            response (requests.Response): HTTP yanıtı
-            endpoint (str): İsteğin yapıldığı endpoint
-        """
         self.request = RequestData(request)
         self.response = ResponseData(response)
         self.endpoint = endpoint
         self.statusCode = response.status_code
 
 def export_data_to_excel(data_list, filename, app_name):
-    """
-    İstek ve yanıt verilerini Excel dosyasına aktarır.
-    
-    Args:
-        data_list (list): RequestAndResponseData nesnelerini içeren liste
-        filename (str): Kaydedilecek Excel dosyası adı
-        app_name (str): İlgili uygulama adı
-    
-    Returns:
-        bool: İşlem başarılı ise True, değilse False
-    """
     try:
         if not data_list:
             logger.warning(f"{app_name} için veri bulunamadı, Excel dosyası oluşturulmadı.")

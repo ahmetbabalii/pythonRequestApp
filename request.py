@@ -4,7 +4,6 @@ import json
 from concurrent.futures import ThreadPoolExecutor
 import logging
 
-# Logging yapılandırması
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(levelname)s - %(message)s',
@@ -109,18 +108,5 @@ for veri in veriler:
 
     df = pd.DataFrame(data, columns=['StatusCode', 'RequestParameters', 'ResponseParameters', 'EndPoint'])
     df.to_excel(f'{veri.uygulamaadi}.xlsx', index=False)
-    
-    # with open(f'{veri.uygulamaadi}.txt', 'w') as f:  
-    #     for item in results:
-    #         request_dict = vars(item.request)
-    #         reponse_dict = vars(item.response)    
-    #         endPoint = item.endpoint
-            
-    #         reuqestParametersList = ' || '.join([f"{key}: {value}" for key, value in request_dict.items() if key != ''])
-    #         responseParametersList = ' || '.join([f"{key}: {value}" for key, value in reponse_dict.items() if key != ''])  
-            
-    #         requestAndResponseSum = f'Request: {reuqestParametersList} >>> Response: {responseParametersList} >>> EndPoint: {endPoint}'
-            
-    #         f.write(requestAndResponseSum + '\n')
 
 
